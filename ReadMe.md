@@ -15,12 +15,6 @@ Convert videos to ASCII art and display them in your terminal! This Python scrip
 - OpenCV (`cv2`)
 - NumPy
 
-## Installation
 
-1. **Clone the repository:**
-
-   ```bash
-   git clone https://github.com/yourusername/ascii-video-converter.git
-   cd ascii-video-converter
 
 
