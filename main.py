@@ -1,40 +1,43 @@
 import cv2
 import numpy as np
+import os
+import time
 import argparse
 from typing import Tuple, Dict
 
-# Extended ASCII characters for better detail
-ASCII_CHARS = "@%#*+=-:. "
-
-# Enhanced color map for ASCII characters
-COLOR_MAP: Dict[str, Tuple[int, int, int]] = {
-    "@": (255, 255, 255),
-    "%": (200, 200, 200),
-    "#": (150, 150, 150),
-    "*": (100, 100, 100),
-    "+": (70, 70, 70),
-    "=": (50, 50, 50),
-    "-": (30, 30, 30),
-    ":": (20, 20, 20),
-    ".": (10, 10, 10),
-    " ": (0, 0, 0)
+ASCII_CHARS = "@#8&%$OQ0**+=-:. "
+COLOR_MAP = {
+    "@": (255, 255, 255),  # Bright white
+    "#": (200, 200, 200),  # Light gray
+    "8": (150, 150, 150),  # Gray
+    "&": (128, 128, 128),  # Medium gray
+    "%": (100, 100, 100),  # Dark gray
+    "$": (85, 85, 85),     # Darker gray
+    "O": (70, 70, 70),     # Very dark gray
+    "Q": (55, 55, 55),     # Almost black
+    "0": (40, 40, 40),     # Blackish
+    "*": (30, 30, 30),     # Black
+    "+": (20, 20, 20),     # Almost black
+    "=": (15, 15, 15),     # Very dark gray
+    "-": (10, 10, 10),     # Darker gray
+    ":": (5, 5, 5),        # Almost black
+    ".": (2, 2, 2),        # Near black
+    " ": (0, 0, 0)         # Pure black
 }
 
-def resize_image(image: np.ndarray, new_width: int = 100) -> np.ndarray:
-    height, width = image.shape[:2]
-    aspect_ratio = height / width
-    new_height = int(aspect_ratio * new_width * 0.55)
+
+def resize_image(image: np.ndarray) -> np.ndarray:
+    # Resize the image to 50x50 pixels
+    new_width, new_height = 128 , 40
     return cv2.resize(image, (new_width, new_height))
 
 def adjust_contrast(image: np.ndarray, alpha: float = 1.5, beta: int = 0) -> np.ndarray:
-    # Adjust the contrast of the image
     return cv2.convertScaleAbs(image, alpha=alpha, beta=beta)
 
 def grayify(image: np.ndarray) -> np.ndarray:
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 def pixels_to_ascii(image: np.ndarray) -> str:
-    # Lookup table for ASCII conversion
     lut = np.array([ASCII_CHARS[min(i // 25, len(ASCII_CHARS) - 1)] for i in range(256)])
     return ''.join(lut[image.flatten()])
 
@@ -58,7 +61,7 @@ def process_video(video_path: str, output_width: int, save_output: bool = False)
         raise IOError("Error opening video file.")
 
     fps = cap.get(cv2.CAP_PROP_FPS)
-    frame_time = int(1000 / fps)  # Convert frame time to milliseconds
+    frame_time = 1 / fps  # Calculate time per frame in seconds
 
     if save_output:
         output_file = open("ascii_output.txt", "w")
@@ -83,7 +86,7 @@ def process_video(video_path: str, output_width: int, save_output: bool = False)
                     print("\033c", end="")  # Clear the terminal
                     print(colored_ascii, end="")
 
-                cv2.waitKey(frame_time)
+                time.sleep(frame_time)  # Use sleep instead of cv2.waitKey()
             except Exception as e:
                 print(f"Error processing frame {frame_count}: {str(e)}")
                 continue
